@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Proxy</title>
+    <base href="/p/">
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+        }
+        #iframe {
+            width: 100vw;
+            height: 100vh;
+            border: none;
+        }
+    </style>
+</head>
+<body>
+    <iframe id="iframe"></iframe>
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/static/sw.js').then(function(registration) {
+                console.log('Service Worker registered with scope:', registration.scope);
+            }).catch(function(error) {
+                console.log('Service Worker registration failed:', error);
+            });
+        }
+        var requestedUrl = new URL(window.location.pathname.substring(1))
+        document.querySelector('base').href = '/p/'+requestedUrl.origin
+        document.getElementById('iframe').setAttribute('src', '/p/'+requestedUrl)
+    </script>
+</body>
+</html>
