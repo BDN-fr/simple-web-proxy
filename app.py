@@ -17,6 +17,9 @@ def index():
 
 @app.route("/<path:path>", methods=['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'])
 def proxy(path:str):
+    if path == 'proxy-sw.js':
+        return app.send_static_file(path)
+
     path_url = urlparse(path)
 
     if path_url.netloc == '' and request.cookies['proxy-host']:
@@ -40,14 +43,17 @@ def proxy(path:str):
     print(path)
 
     # Almost otally taken from https://stackoverflow.com/a/36601467
-    res = requests.request(  # ref. https://stackoverflow.com/a/36601467/248616
-        method          = request.method,
-        url             = path,
-        headers         = {k:v for k,v in request.headers if k.lower() != 'host'}, # exclude 'host' header
-        data            = request.get_data(),
-        cookies         = request.cookies,
-        allow_redirects = True,
-    )
+    try:
+        res = requests.request(  # ref. https://stackoverflow.com/a/36601467/248616
+            method          = request.method,
+            url             = path,
+            headers         = {k:v for k,v in request.headers if k.lower() != 'host'}, # exclude 'host' header
+            data            = request.get_data(),
+            cookies         = request.cookies,
+            allow_redirects = True,
+        )
+    except:
+        pass
 
     excluded_headers = ['content-encoding', 'content-length', 'transfer-encoding', 'connection']  #NOTE we here exclude all "hop-by-hop headers" defined by RFC 2616 section 13.5.1 ref. https://www.rfc-editor.org/rfc/rfc2616#section-13.5.1
     headers          = [
@@ -64,8 +70,21 @@ def proxy(path:str):
         end_head_index = res.text.find('</head>')
         base = f'    <base href="{request.full_path+'/'}">\n'
         content = res.text[:end_head_index-1] + base + res.text[end_head_index:]
+        script = """
+        <script>
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('/proxy-sw.js').then(function(registration) {
+                    console.log('Service Worker registered with scope:', registration.scope);
+                }).catch(function(error) {
+                    console.log('Service Worker registration failed:', error);
+                });
+            }
+        </script>
+        """
+        end_body_index = content.find('</body>')
+        content = content[:end_body_index-1] + script + content[end_body_index:]
+        print(content)
         response = Response(content, res.status_code, headers)
-        #TODO: insert the script for making the service worker
 
     if not request.referrer:
         response.set_cookie('proxy-host', host)
