@@ -4,32 +4,22 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Proxy</title>
-    <base href="/p/">
-    <style>
-        body {
-            margin: 0;
-            overflow: hidden;
-        }
-        #iframe {
-            width: 100vw;
-            height: 100vh;
-            border: none;
-        }
-    </style>
 </head>
 <body>
-    <iframe id="iframe"></iframe>
+    <p>Wait, you will be redirected...</p>
     <script>
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/static/sw.js').then(function(registration) {
-                console.log('Service Worker registered with scope:', registration.scope);
+            navigator.serviceWorker.register('/proxy-sw.js', {scope:'/'}).then(function(registration) {
+                var requestedUrl = new URL(window.location.pathname.substring('/web/'.length))
+                registration.active.postMessage(requestedUrl.origin)
+                window.location.replace(window.location.origin + requestedUrl.pathname + requestedUrl.search)
             }).catch(function(error) {
-                console.log('Service Worker registration failed:', error);
+                console.error('Service Worker registration failed:', error)
+                document.body.innerText = 'Service Worker registration failed (see console)'
             });
+        } else {
+            document.body.innerText = 'Service Worker unavailable'
         }
-        var requestedUrl = new URL(window.location.pathname.substring(1))
-        document.querySelector('base').href = '/p/'+requestedUrl.origin
-        document.getElementById('iframe').setAttribute('src', '/p/'+requestedUrl)
     </script>
 </body>
 </html>

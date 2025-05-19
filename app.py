@@ -5,55 +5,25 @@ from flask import Flask, request, jsonify, Response, render_template
 app = Flask(__name__)
 app.static_folder = 'static'
 
-@app.route('/static/<path:path>')
-def static_handler(path):
-    return app.send_static_file(path)
+@app.route('/web/<path:path>')
+def web(path):
+    return render_template('index.html')
 
 @app.route('/')
-def index():
-    if request.cookies['proxy-host']:
-        return app.redirect('/'+request.cookies['proxy-host'])
-    return 'You need to put the link', 400
-
 @app.route("/<path:path>", methods=['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'])
 def proxy(path:str):
     if path == 'proxy-sw.js':
         return app.send_static_file(path)
 
-    path_url = urlparse(path)
-
-    if path_url.netloc == '' and request.cookies['proxy-host']:
-        # path_url = urlparse(request.cookies['proxy-host']+path_url.path)
-        newUrl = path_url.scheme+request.cookies['proxy-host']+'/'+ \
-            path_url.path == '/'+request.cookies['proxy-host'] and '/' or path_url.path + \
-            (path_url.params != '' and ('?'+path_url.params) or '') + \
-            (path_url.fragment != '' and ('#'+path_url.fragment) or '')
-        path_url = urlparse(newUrl)
-    if path_url.scheme == '':
-        path_url = urlparse('https://'+path)
-
-    print(path_url)
-
-    host = path_url.scheme + '://' + path_url.netloc
-
-    print(host)
-
-    path = host+path_url.path+ (path_url.params != '' and ('?'+path_url.params) or '/') + (path_url.fragment != '' and ('#'+path_url.fragment) or '')
-
-    print(path)
-
     # Almost otally taken from https://stackoverflow.com/a/36601467
-    try:
-        res = requests.request(  # ref. https://stackoverflow.com/a/36601467/248616
-            method          = request.method,
-            url             = path,
-            headers         = {k:v for k,v in request.headers if k.lower() != 'host'}, # exclude 'host' header
-            data            = request.get_data(),
-            cookies         = request.cookies,
-            allow_redirects = True,
-        )
-    except:
-        pass
+    res = requests.request(  # ref. https://stackoverflow.com/a/36601467/248616
+        method          = request.method,
+        url             = path,
+        headers         = {k:v for k,v in request.headers if k.lower() != 'host'}, # exclude 'host' header
+        data            = request.get_data(),
+        cookies         = request.cookies,
+        allow_redirects = True,
+    )
 
     excluded_headers = ['content-encoding', 'content-length', 'transfer-encoding', 'connection']  #NOTE we here exclude all "hop-by-hop headers" defined by RFC 2616 section 13.5.1 ref. https://www.rfc-editor.org/rfc/rfc2616#section-13.5.1
     headers          = [
@@ -62,32 +32,6 @@ def proxy(path:str):
     ]
 
     response = Response(res.content, res.status_code, headers)
-    
-    if response.content_type.find('text/html') != -1:
-        # baseIndex = res.text.find('<base')
-        # if baseIndex != -1:
-        #     pass # TODO: modify the path
-        end_head_index = res.text.find('</head>')
-        base = f'    <base href="{request.full_path+'/'}">\n'
-        content = res.text[:end_head_index-1] + base + res.text[end_head_index:]
-        script = """
-        <script>
-            if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.register('/proxy-sw.js').then(function(registration) {
-                    console.log('Service Worker registered with scope:', registration.scope);
-                }).catch(function(error) {
-                    console.log('Service Worker registration failed:', error);
-                });
-            }
-        </script>
-        """
-        end_body_index = content.find('</body>')
-        content = content[:end_body_index-1] + script + content[end_body_index:]
-        print(content)
-        response = Response(content, res.status_code, headers)
-
-    if not request.referrer:
-        response.set_cookie('proxy-host', host)
 
     return response
 
