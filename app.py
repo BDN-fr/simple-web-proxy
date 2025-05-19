@@ -7,9 +7,12 @@ app.static_folder = 'static'
 
 @app.route('/web/<path:path>')
 def web(path):
-    return render_template('index.html')
+    return render_template('redirect.html')
 
 @app.route('/')
+def root():
+    return render_template('nopath.html')
+
 @app.route("/<path:path>", methods=['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'])
 def proxy(path:str):
     if path == 'proxy-sw.js':
