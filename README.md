@@ -1,3 +1,3 @@
 # simple-web-proxy
-Web usage: yourdomain.org/web/https://youradress.org
-Proxy: youdomain.org/https://youradress.org
+Web usage: `https://yourdomain.org/web/https://youradress.org`  
+Proxy: `https://youdomain.org/https://youradress.org`
