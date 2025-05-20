@@ -6,7 +6,7 @@
     <title>Proxy</title>
 </head>
 <body>
-    <p>Wait, you will be redirected...</p>
+    <p>Redirecting...</p>
     <script>
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('/proxy-sw.js', {scope:'/'}).then(function(registration) {

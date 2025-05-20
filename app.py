@@ -5,13 +5,13 @@ from flask import Flask, request, jsonify, Response, render_template
 app = Flask(__name__)
 app.static_folder = 'static'
 
-@app.route('/web/<path:path>')
-def web(path):
-    return render_template('redirect.html')
-
 @app.route('/')
 def root():
     return render_template('nopath.html')
+
+@app.route('/web/<path:path>')
+def web(path):
+    return render_template('redirect.html')
 
 @app.route("/<path:path>", methods=['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'])
 def proxy(path:str):
