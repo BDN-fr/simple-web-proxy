@@ -1,3 +1,11 @@
+const permissiveCSP = "default-src * 'unsafe-inline' 'unsafe-eval' data: blob:; " +
+    "script-src * 'unsafe-inline' 'unsafe-eval'; " +
+    "style-src * 'unsafe-inline'; " +
+    "img-src * data: blob:; " +
+    "font-src *; " +
+    "connect-src *; " +
+    "frame-src *;"
+
 var origin = ''
 
 self.addEventListener('install', (event) => {
@@ -49,19 +57,29 @@ self.addEventListener('fetch', async event => {
                     if (!directory.endsWith('/')) {
                         directory = directory + '/'
                     }
-                    const hasBaseTag = html.includes('<base')
 
                     var newHtml
+                    const hasBaseTag = html.includes('<base')
                     if (hasBaseTag) {
                         newHtml = html.replace(/<base[^>]*>/, `<base href="${directory}">`)
                     } else {
                         newHtml = html.replace('<head>', `<head><base href="${directory}">`)
                     }
 
+                    var newHeaders = new Headers(res.headers)
+                    newHeaders.delete('content-security-policy')
+                    newHeaders.delete('content-security-policy-report-only')
+                    newHeaders.delete('x-content-security-policy')
+                    newHeaders.delete('x-webkit-csp')
+                    newHeaders.delete('x-frame-options')
+                    newHeaders.delete('x-content-type-options')
+                    newHeaders.delete('referrer-policy')
+                    newHeaders.set('Content-Security-Policy', permissiveCSP)
+
                     return new Response(newHtml, {
                         status: res.status,
                         statusText: res.statusText,
-                        headers: res.headers
+                        headers: newHeaders
                     })
                 })
             })

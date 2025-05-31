@@ -23,22 +23,25 @@ def proxy(path:str):
     if not urlparse(path).scheme:
         return 'Your url don\'t have a protocol', 400
 
-    # unwanted_headers = ['host', 'sec-fetch-site', 'sec-fetch-mode', 'sec-fetch-dest', 'pragma', 'connection', 'cache-control', 'dnt', 'rtt', 'downlink', 'referer', 'user-agent']
-    # referer
-    # Almost otally taken from https://stackoverflow.com/a/36601467
+    unwanted_headers = ['host']
+
+    headers = {k:v for k,v in request.headers if not (k.lower() in unwanted_headers)}
+    if 'Referer' in headers and headers['Referer'].startswith(request.host_url):
+        headers['Referer'] = path
+    headers['Accept-Encoding'] = 'gzip, deflate'
+
+    # Almost totally taken from https://stackoverflow.com/a/36601467
     try:
         res = requests.request(  # ref. https://stackoverflow.com/a/36601467/248616
             method          = request.method,
             url             = path,
-            # headers         = {k:v for k,v in request.headers if not (k.lower() in unwanted_headers)}, # exclude 'host' header
+            headers         = headers, # exclude some headers
             data            = request.get_data(),
             cookies         = request.cookies,
             allow_redirects = True,
         )
     except Exception as e:
-        return e, 500
-
-    # print({k:v for k,v in request.headers if not (k.lower() in unwanted_headers)})
+        return str(e), 500
 
     excluded_headers = ['content-encoding', 'content-length', 'transfer-encoding', 'connection']  #NOTE we here exclude all "hop-by-hop headers" defined by RFC 2616 section 13.5.1 ref. https://www.rfc-editor.org/rfc/rfc2616#section-13.5.1
     headers          = [
