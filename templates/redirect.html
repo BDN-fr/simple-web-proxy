@@ -11,8 +11,21 @@
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('/proxy-sw.js', {scope:'/'}).then(function(registration) {
                 var requestedUrl = new URL(window.location.pathname.substring('/web/'.length))
-                registration.active.postMessage(requestedUrl.origin)
-                window.location.replace(window.location.origin + requestedUrl.pathname + requestedUrl.search)
+
+                function redirect() {
+                    registration.active.postMessage(requestedUrl.origin)
+                    window.location.replace(window.location.origin + requestedUrl.pathname + requestedUrl.search)
+                }
+
+                if (registration.active || registration.waiting) {
+                    redirect()
+                } else if (registration.installing) {
+                    registration.installing.addEventListener('statechange', (e) => {
+                        if (registration.active) {
+                            redirect()
+                        }
+                    })
+                }
             }).catch(function(error) {
                 console.error('Service Worker registration failed:', error)
                 document.body.innerText = 'Service Worker registration failed (see console)'
