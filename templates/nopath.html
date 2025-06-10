@@ -1,2 +1,129 @@
-You put no path, if you want to access the proxy with a web browser, go to "/web/[any_web_adress]" <br/>
-If you want to use the proxy for a request, you need to use "/[any_web_adress]"
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Web Proxy</title>
+</head>
+<body>
+    <style>
+        :root {
+            --foreground: white;
+            --background: #222;
+            --color: #5BCFFF;
+        }
+
+        * {
+            box-sizing: border-box;
+            padding: 0;
+            margin: 0;
+            text-align: center;
+        }
+
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: Arial, Helvetica, sans-serif;
+            color: var(--foreground);
+            background: var(--background);
+            height: 100vh;
+            width: 100vw;
+        }
+
+        input {
+            height: 2rem;
+            border: none;
+            border-radius: 15px;
+            padding: 5px;
+        }
+
+        button {
+            background-color: var(--color);
+            border: none;
+            height: 2rem;
+            border-radius: 15px;
+            padding: 5px;
+        }
+
+        h1 {
+            margin-bottom: 1rem;
+        }
+
+        nav {
+            position: absolute;
+            bottom: 0px;
+        }
+
+        a {
+            color: var(--foreground);
+            transition: all 0.2s linear;
+        }
+        a:hover {
+            color: var(--color);
+        }
+
+        #url-form {
+            width: 100%;
+            display: flex;
+        }
+
+        #url-input {
+            max-width: 100%;
+            border-top-right-radius: 0;
+            border-bottom-right-radius: 0;
+            flex-grow: 1;
+        }
+
+        #url-button {
+            border-top-left-radius: 0;
+            border-bottom-left-radius: 0;
+        }
+
+        #error-message {
+            color: red;
+        }
+    </style>
+    <div>
+        <h1>Simple Web Proxy</h1>
+        <form action="" method="dialog" id="url-form">
+            <input type="text" name="url" id="url-input" placeholder="https://bdn-fr.xyz/" required>
+            <button id="url-button" type="submit">GO</button>
+        </form>
+        <p id="error-message"></p>
+    </div>
+    <nav>
+        <span>Made by <a href="https://bdn-fr.xyz">BDN_fr</a> - </span>
+        <a href="https://github.com/BDN-fr/simple-web-proxy">Github repo</a>
+    </nav>
+    <script>
+        const form = document.getElementById('url-form')
+        const errorMessage = document.getElementById('error-message')
+
+        function isValidURL(string) {
+            var res = string.match(/(http(s)?:\/\/.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)/g);
+            return (res !== null)
+        };
+
+        if (!'serviceWorker' in navigator) {
+            form.style.display = 'none'
+            errorMessage.innerText = "Your browser can't run services workers, please update it or use a different one"
+        }
+
+        form.addEventListener('submit', ev => {
+            ev.preventDefault();
+            const input = document.getElementById('url-input')
+            var url = input.value
+
+            if (isValidURL(url)) {
+                if (!url.startsWith("http://") && !url.startsWith("https://")) {
+                    url = "http://" + url;
+                }
+                window.location.pathname = "/web/" + url
+            } else {
+                errorMessage.innerText = "URL is not valid"
+            }
+        })
+    </script>
+</body>
+</html>
