@@ -6,6 +6,35 @@ const permissiveCSP = "default-src * 'unsafe-inline' 'unsafe-eval' data: blob:; 
     "connect-src *; " +
     "frame-src *;"
 
+const quitHtml = `\
+<div style='position: absolute; left: 0px; bottom: 0px; z-index: 99999;'>
+    <button
+    id='quit-proxy'
+    style='background-color: #5BCFFF; border: none; height: 2rem; width: auto;\
+    border-radius: 15px; padding: 5px; margin: 0;'
+    >
+        Quit proxy
+    </button>
+</div>
+<script>
+document.getElementById('quit-proxy').addEventListener('click', ev => {
+    navigator.serviceWorker.getRegistration().then(function(registration) {
+        if (registration) {
+            registration.unregister()
+                .then(function() {
+                    window.location.href = '/'
+                })
+                .catch(function(error) {
+                    console.error('Service Worker unregistration failed:', error);
+                })
+        } else {
+            window.location.href = '/'
+        }
+    })
+})
+</script>
+`
+
 var origin = ''
 
 self.addEventListener('install', (event) => {
@@ -44,7 +73,7 @@ self.addEventListener('fetch', async event => {
 
     console.log('Proxying ' + url.href + ' to ' + newUrl.href)
 
-    // Adding the base tag to all pages to make relative paths works
+    // Modifying the HTML page
     if (
         event.request.destination === 'document' ||
         event.request.headers.get('Accept').includes('text/html')
@@ -65,6 +94,7 @@ self.addEventListener('fetch', async event => {
                     } else {
                         newHtml = html.replace('<head>', `<head><base href="${directory}">`)
                     }
+                    newHtml = newHtml.replace('</body>', quitHtml + '</body>')
 
                     var newHeaders = new Headers(res.headers)
                     newHeaders.delete('content-security-policy')
