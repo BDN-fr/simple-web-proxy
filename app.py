@@ -25,7 +25,7 @@ def proxy(path:str):
 
     unwanted_headers = ['host']
 
-    headers = {k:v for k,v in request.headers if not (k.lower() in unwanted_headers)}
+    headers = {k:v for k,v in request.headers if not (k.lower() in unwanted_headers or k.lower().startswith('x-forwarded'))}
     if 'Referer' in headers and headers['Referer'].startswith(request.host_url):
         headers['Referer'] = path
     headers['Accept-Encoding'] = 'gzip, deflate'
