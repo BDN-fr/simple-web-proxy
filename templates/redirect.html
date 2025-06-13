@@ -17,7 +17,7 @@
                     window.location.replace(window.location.origin + requestedUrl.pathname + requestedUrl.search)
                 }
 
-                if (registration.active || registration.waiting) {
+                if (registration.active) {
                     redirect()
                 } else if (registration.installing) {
                     registration.installing.addEventListener('statechange', (e) => {

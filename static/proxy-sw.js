@@ -7,11 +7,10 @@ const permissiveCSP = "default-src * 'unsafe-inline' 'unsafe-eval' data: blob:; 
     "frame-src *;"
 
 const quitHtml = `\
-<div style='position: absolute; left: 0px; bottom: 0px; z-index: 99999;'>
+<div style='position: fixed; left: 0px; bottom: 0px; z-index: 99999; font-family: Arial, Helvetica, sans-serif; font-weight: 400; font-size: 14px;'>
     <button
     id='quit-proxy'
-    style='background-color: #5BCFFF; border: none; height: 2rem; width: auto;\
-    border-radius: 15px; padding: 5px; margin: 0;'
+    style='background-color: #5BCFFF; color: #222222; border: none; height: 2rem; width: auto; border-radius: 15px; padding: 5px; margin: 0;'
     >
         Quit proxy
     </button>
@@ -45,12 +44,10 @@ self.addEventListener('activate', (event) => {
     event.waitUntil(clients.claim());
 });
 
-// https://stackoverflow.com/q/68381113
 self.addEventListener('fetch', async event => {
+    if (origin=='') return
     const url = new URL(event.request.url);
-    if (url.href.startsWith(self.location.origin + '/web/')) {
-        return
-    }
+    if (url.href.startsWith(self.location.origin + '/web/')) return
 
     var newUrl = new URL(
         self.location.origin + '/' +

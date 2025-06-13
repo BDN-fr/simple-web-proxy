@@ -1,6 +1,7 @@
 import requests
 from urllib.parse import urlparse
 from flask import Flask, request, jsonify, Response, render_template
+import os
 
 app = Flask(__name__)
 app.static_folder = 'static'
@@ -17,7 +18,8 @@ def web(path):
 
 @app.route("/<path:path>", methods=['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'])
 def proxy(path:str):
-    if path == 'proxy-sw.js':
+    static_file_path = os.path.join(app.static_folder, path)
+    if os.path.isfile(static_file_path):
         return app.send_static_file(path)
 
     if not urlparse(path).scheme:
