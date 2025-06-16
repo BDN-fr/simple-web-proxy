@@ -1,3 +1,9 @@
 # simple-web-proxy
-Web usage: `https://yourdomain.org/web/https://anyadress.org/some/path`  
-Proxy: `https://yourdomain.org/https://anyadress.org/some/path`
+You can install the server with Docker with the [Dockerfile](/Dockerfile)
+The server is accessible from the port 5000
+
+## Usage
+
+With a web browser: `https://example.org/`  
+With a web browser but with an instant redirect: `https://example.org/web/https://example.net/some/path`  
+Single request: `https://example.org/https://example.net/some/path`
