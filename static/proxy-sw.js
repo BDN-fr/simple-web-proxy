@@ -10,7 +10,7 @@ const quitHtml = `\
 <div style='position: fixed; left: 0px; bottom: 0px; z-index: 99999; font-family: Arial, Helvetica, sans-serif; font-weight: 400; font-size: 14px;'>
     <button
     id='quit-proxy'
-    style='background-color: #5BCFFF; color: #222222; border: none; height: 2rem; width: auto; border-radius: 15px; padding: 5px; margin: 0;'
+    style='background-color: #5BCFFF; color: #222222; border: none; height: 2rem; width: auto; border-radius: 15px; padding: 5px; margin: 0; cursor: pointer;'
     >
         Quit proxy
     </button>
