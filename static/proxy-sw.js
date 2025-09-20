@@ -34,7 +34,7 @@ document.getElementById('quit-proxy').addEventListener('click', ev => {
 </script>
 `
 
-var origin = ''
+var origin = 'proxyPath'
 
 self.addEventListener('install', (event) => {
     self.skipWaiting();
@@ -114,8 +114,4 @@ self.addEventListener('fetch', async event => {
     } else {
         event.respondWith(fetch(newUrl, requestOptions));
     }
-});
-
-self.addEventListener('message', e => {
-    origin = e.data
 });

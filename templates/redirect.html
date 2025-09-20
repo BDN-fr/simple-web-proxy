@@ -14,7 +14,6 @@
                 var requestedUrl = new URL(window.location.pathname.substring('/web/'.length))
 
                 function redirect() {
-                    registration.active.postMessage(requestedUrl.origin)
                     window.location.replace(window.location.origin + requestedUrl.pathname + requestedUrl.search)
                 }
 

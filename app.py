@@ -1,6 +1,6 @@
 import requests
 from urllib.parse import urlparse
-from flask import Flask, request, jsonify, Response, render_template
+from flask import Flask, request, jsonify, Response, make_response, render_template
 import os
 
 app = Flask(__name__)
@@ -12,9 +12,12 @@ def root():
 
 @app.route('/web/<path:path>')
 def web(path):
-    if not urlparse(path).scheme:
+    url = urlparse(path)
+    if not url.scheme:
         return 'Your url don\'t have a protocol', 400
-    return render_template('redirect.html')
+    res = make_response(render_template('redirect.html'))
+    res.set_cookie('proxyPath', url.scheme+'://'+url.netloc)
+    return res
 
 @app.route("/<path:path>", methods=['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'])
 def proxy(path:str):
@@ -22,8 +25,13 @@ def proxy(path:str):
     if os.path.isfile(static_file_path):
         return app.send_static_file(path)
 
+    if request.cookies.get('proxyPath'):
+        path = path.replace('proxyPath', request.cookies['proxyPath'])
+
     if not urlparse(path).scheme:
         return 'Your url don\'t have a protocol', 400
+
+    print(path)
 
     unwanted_headers = ['host']
 
