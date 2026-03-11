@@ -28,7 +28,10 @@ def proxy(path:str):
     if request.cookies.get('proxyPath'):
         path = path.replace('proxyPath', request.cookies['proxyPath'])
 
-    if not urlparse(path).scheme:
+    url = urlparse(path)
+    if not url.scheme:
+        if not url.netloc:
+            return render_template('nopath.html')
         return 'Your url don\'t have a protocol', 400
 
     unwanted_headers = ['host']
