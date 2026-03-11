@@ -31,8 +31,6 @@ def proxy(path:str):
     if not urlparse(path).scheme:
         return 'Your url don\'t have a protocol', 400
 
-    print(path)
-
     unwanted_headers = ['host']
 
     headers = {k:v for k,v in request.headers if not (k.lower() in unwanted_headers or k.lower().startswith('x-forwarded'))}

@@ -7,10 +7,10 @@ const permissiveCSP = "default-src * 'unsafe-inline' 'unsafe-eval' data: blob:; 
     "frame-src *;"
 
 const quitHtml = `\
-<div style='position: fixed; left: 0px; bottom: 0px; z-index: 99999; font-family: Arial, Helvetica, sans-serif; font-weight: 400; font-size: 14px;'>
+<div style='position: fixed; left: 0px; bottom: 0px; z-index: 999999999;'>
     <button
     id='quit-proxy'
-    style='background-color: #5BCFFF; color: #222222; border: none; height: 2rem; width: auto; border-radius: 15px; padding: 5px; margin: 0; cursor: pointer;'
+    style='background-color: #5BCFFF; color: #222222; border: none; height: 2rem; width: auto; border-radius: 15px; padding: 5px; margin: 0; cursor: pointer; font-family: Arial, Helvetica, sans-serif; font-weight: 400; font-size: 14px;'
     >
         Quit proxy
     </button>
@@ -79,7 +79,10 @@ self.addEventListener('fetch', async event => {
             fetch(newUrl, requestOptions).then(res => {
                 return res.text().then(html => {
                     // var directory = newUrl.pathname.substring(0, newUrl.pathname.lastIndexOf('/') + 1)
-                    var directory = newUrl.pathname.replace(origin + '/', '') // Not works if the page have an extension like /path/to/a/page/index.html but who cares ? (a lot of websites)
+                    var directory = newUrl.pathname.replace(origin + '/', '')
+                    let lastIndex = directory.lastIndexOf('/')
+                    let last = directory.substring(lastIndex)
+                    directory = directory.substring(0, lastIndex) + last.replace(/[\w-]*\.[\w]*/, '')
                     if (!directory.endsWith('/')) {
                         directory = directory + '/'
                     }
